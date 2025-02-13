@@ -15,17 +15,20 @@ import org.springframework.stereotype.Service;
 
 import com.app.entites.Cart;
 import com.app.entites.CartItem;
+import com.app.entites.CodAddress;
 import com.app.entites.Order;
 import com.app.entites.OrderItem;
 import com.app.entites.Payment;
 import com.app.entites.Product;
 import com.app.exceptions.APIException;
 import com.app.exceptions.ResourceNotFoundException;
+import com.app.payloads.CodAddressDTO;
 import com.app.payloads.OrderDTO;
 import com.app.payloads.OrderItemDTO;
 import com.app.payloads.OrderResponse;
 import com.app.repositories.CartItemRepo;
 import com.app.repositories.CartRepo;
+import com.app.repositories.CodAddressRepo;
 import com.app.repositories.OrderItemRepo;
 import com.app.repositories.OrderRepo;
 import com.app.repositories.PaymentRepo;
@@ -64,8 +67,11 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	public ModelMapper modelMapper;
 
+	@Autowired
+	public CodAddressRepo codAddressRepo;
+
 	@Override
-	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod) {
+	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod, String codAddress) {
 
 		Cart cart = cartRepo.findCartByEmailAndCartId(email, cartId);
 
@@ -73,7 +79,13 @@ public class OrderServiceImpl implements OrderService {
 			throw new ResourceNotFoundException("Cart", "cartId", cartId);
 		}
 
+		if (!paymentMethod.equalsIgnoreCase("COD")) {
+			throw new APIException("Only COD payment is allowed.");
+		}
+
 		Order order = new Order();
+
+		System.out.println(codAddress);
 
 		order.setEmail(email);
 		order.setOrderDate(LocalDate.now());
@@ -88,6 +100,18 @@ public class OrderServiceImpl implements OrderService {
 		payment = paymentRepo.save(payment);
 
 		order.setPayment(payment);
+
+		// CodAddress address = new CodAddress();
+		// address.setPayment(payment);
+		// address.setBuildingName(codAddress.getBuildingName());
+		// address.setStreet(codAddress.getStreet());
+		// address.setPincode(codAddress.getPincode());
+		// address.setCountry(codAddress.getCountry());
+		// address.setState(codAddress.getState());
+		// address.setCity(codAddress.getCity());
+
+		// address= codAddressRepo.save(address);
+
 
 		Order savedOrder = orderRepo.save(order);
 
