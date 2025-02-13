@@ -85,6 +85,8 @@ public class OrderServiceImpl implements OrderService {
 
 		Order order = new Order();
 
+		System.out.println(codAddress);
+
 		order.setEmail(email);
 		order.setOrderDate(LocalDate.now());
 
